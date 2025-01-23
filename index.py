@@ -1,6 +1,5 @@
 import os
 import sys
-from argparse import ArgumentParser
 
 from flask import Flask, request, abort
 from linebot.v3 import (
@@ -24,8 +23,8 @@ from linebot.v3.messaging import (
 app = Flask(__name__)
 
 # get channel_secret and channel_access_token from your environment variable
-channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
-channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
+channel_secret = os.getenv('LINE_CHANNEL_SECRET', "9b55744b05da43b41b76c4b01eddb1b7")
+channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', "Gkk7XdjyB0KveHEg9T/Eom2h1/5DIh0nV564rpP2a2MGLBPdSLZqr/zMR6FXUtQfjtluvLICg/S7LuMqEKn6io9ydxfxecnnLgQ4XLUa7yRtwjzGWtxRpzoXlb1+tx/EiAaisz7A78MCjROBsJ8PvwdB04t89/1O/w1cDnyilFU=")
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
     sys.exit(1)
