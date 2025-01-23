@@ -1,67 +1,84 @@
-from flask import Flask, request, abort
-from linebot import LineBotApi, WebhookHandler
-from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from api.chatgpt import ChatGPT
-
 import os
+import sys
+from argparse import ArgumentParser
 
-line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
-line_handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
-working_status = os.getenv("DEFALUT_TALKING", default = "true").lower() == "true"
+from flask import Flask, request, abort
+from linebot.v3 import (
+     WebhookHandler
+)
+from linebot.v3.exceptions import (
+    InvalidSignatureError
+)
+from linebot.v3.webhooks import (
+    MessageEvent,
+    TextMessageContent,
+)
+from linebot.v3.messaging import (
+    Configuration,
+    ApiClient,
+    MessagingApi,
+    ReplyMessageRequest,
+    TextMessage
+)
 
 app = Flask(__name__)
-chatgpt = ChatGPT()
 
-# domain root
-@app.route('/')
-def home():
-    return 'Hello, World!'
+# get channel_secret and channel_access_token from your environment variable
+channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
+channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
+if channel_secret is None:
+    print('Specify LINE_CHANNEL_SECRET as environment variable.')
+    sys.exit(1)
+if channel_access_token is None:
+    print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
+    sys.exit(1)
 
-@app.route("/webhook", methods=['POST'])
+handler = WebhookHandler(channel_secret)
+
+configuration = Configuration(
+    access_token=channel_access_token
+)
+
+
+@app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
+
     # get request body as text
     body = request.get_data(as_text=True)
     app.logger.info("Request body: " + body)
+
     # handle webhook body
     try:
-        line_handler.handle(body, signature)
+        handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
+
     return 'OK'
 
 
-@line_handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    global working_status
-    
-    if event.message.type != "text":
-        return
-    
-    if event.message.text == "啟動":
-        working_status = True
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="我是時下流行的AI智能，目前可以為您服務囉，歡迎來跟我互動~"))
-        return
+@handler.add(MessageEvent, message=TextMessageContent)
+def message_text(event):
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message_with_http_info(
+            ReplyMessageRequest(
+                reply_token=event.reply_token,
+                messages=[TextMessage(text=event.message.text)]
+            )
+        )
 
-    if event.message.text == "安靜":
-        working_status = False
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="感謝您的使用，若需要我的服務，請跟我說 「啟動」 謝謝~"))
-        return
-    
-    if working_status:
-        chatgpt.add_msg(f"Human:{event.message.text}?\n")
-        reply_msg = chatgpt.get_response().replace("AI:", "", 1)
-        chatgpt.add_msg(f"AI:{reply_msg}\n")
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=reply_msg))
 
+# if __name__ == "__main__":
+#     arg_parser = ArgumentParser(
+#         usage='Usage: python ' + __file__ + ' [--port <port>] [--help]'
+#     )
+#     arg_parser.add_argument('-p', '--port', default=8000, help='port')
+#     arg_parser.add_argument('-d', '--debug', default=False, help='debug')
+#     options = arg_parser.parse_args()
+
+#     app.run(debug=options.debug, port=options.port)
 
 if __name__ == "__main__":
     app.run()
