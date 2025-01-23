@@ -40,7 +40,16 @@ configuration = Configuration(
 )
 
 
+@app.route("/", methods=['GET'])
+def hello():
 
+    # handle webhook body
+    try:
+        return "Hello world !!"
+    except InvalidSignatureError:
+        abort(400)
+
+    return 'OK'
 
 @app.route("/callback", methods=['POST'])
 def callback():
