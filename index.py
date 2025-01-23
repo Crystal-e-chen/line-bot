@@ -81,12 +81,14 @@ def callback():
         abort(400)
 
     # if event is MessageEvent and message is TextMessage, then echo text
-    app.logger.info("before event")
+    app.logger.info("before event: " + len(events))
     for event in events:
+        app.logger.info("event type: "+ type(event))
         if not isinstance(event, MessageEvent):
             continue
         # if not isinstance(event.message, TextMessageContent):
         #     continue
+        app.logger.info("process api")
         with ApiClient(configuration) as api_client:
             app.logger.info("process api")
             line_bot_api = MessagingApi(api_client)
