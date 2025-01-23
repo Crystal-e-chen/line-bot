@@ -84,8 +84,8 @@ def callback():
     app.logger.info("before event: %s" , len(events))
     for event in events:
         app.logger.info("event type: %s" , type(event))
-        if not isinstance(event, MessageEvent):
-            continue
+        # if not isinstance(event, MessageEvent):
+        #     continue
         # if not isinstance(event.message, TextMessageContent):
         #     continue
         app.logger.info("process api")
