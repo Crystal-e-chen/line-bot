@@ -66,7 +66,7 @@ def hello():
 
     return 'OK'
 
-@app.route("/callback", methods=['POST'])
+@app.route("/webhook", methods=['POST'])
 def callback():
     signature = request.headers['X-Line-Signature']
 
