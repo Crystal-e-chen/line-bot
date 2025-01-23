@@ -39,6 +39,17 @@ configuration = Configuration(
     access_token=channel_access_token
 )
 
+@app.route("/", methods=['GET'])
+def Helllo():
+
+    # handle webhook body
+    try:
+        return "Hello world !!"
+    except InvalidSignatureError:
+        abort(400)
+
+    return 'OK'
+
 
 @app.route("/callback", methods=['POST'])
 def callback():
