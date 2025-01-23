@@ -91,4 +91,4 @@ def message_text(event):
 #     app.run(debug=options.debug, port=options.port)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
