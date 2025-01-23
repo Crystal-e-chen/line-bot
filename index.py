@@ -81,9 +81,9 @@ def callback():
         abort(400)
 
     # if event is MessageEvent and message is TextMessage, then echo text
-    app.logger.info("before event: " + len(events))
+    app.logger.info("before event: %s" , len(events))
     for event in events:
-        app.logger.info("event type: "+ type(event))
+        app.logger.info("event type: %s" , type(event))
         if not isinstance(event, MessageEvent):
             continue
         # if not isinstance(event.message, TextMessageContent):
