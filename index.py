@@ -38,8 +38,9 @@ configuration = Configuration(
     access_token=channel_access_token
 )
 
+
 @app.route("/", methods=['GET'])
-def Helllo():
+def hello():
 
     # handle webhook body
     try:
@@ -48,7 +49,6 @@ def Helllo():
         abort(400)
 
     return 'OK'
-
 
 @app.route("/callback", methods=['POST'])
 def callback():
